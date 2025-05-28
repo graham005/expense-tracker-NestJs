@@ -31,4 +31,9 @@ export class CategoriesController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);
   }
+
+  @Get('usage')
+getCategoriesWithUsage() {
+  return this.categoriesService.getCategoriesWithUsage();
+}
 }

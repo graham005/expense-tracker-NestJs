@@ -2,50 +2,81 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CategoriesService {
-  private categories: Category[] = []
-  create(createCategoryDto: CreateCategoryDto) {
-    const categoryByHighestId = [...this.categories].sort((a, b) => b.category_id - a.category_id);
-    const newCategory = {
-            category_id: categoryByHighestId.length > 0 ? categoryByHighestId[0].category_id + 1 : 1,
-            created_at: new Date,
-            ...createCategoryDto,
-        }
-        this.categories.push(newCategory)
-        return newCategory
-    }
+  @InjectRepository(Category)
+  private categoryRepository: Repository<Category>
+  async create(createCategoryDto: CreateCategoryDto) {
+    const existingCategory = await this.categoryRepository.findOne({ where: { category_name: createCategoryDto.category_name } });
+    if (existingCategory) {
+      throw new Error('Category with this name already exists');
 
-  findAll() {
-    return this.categories;
+    }
+    const newCategory = await this.categoryRepository.create({ ...createCategoryDto})
+    await this.categoryRepository.save(newCategory);
+
+    return newCategory;
+  }
+  async findAll() {
+    const categories = await this.categoryRepository.find();
+    if (categories.length === 0) {
+      throw new NotFoundException('No categories found');
+    }
+    return categories;
   }
 
-  findOne(id: number) {
-    const category = this.categories.find(category => category.category_id === id);
+  async findOne(id: number) {
+    const category = await this.categoryRepository.findOne({ where: { category_id: id } });
 
-    if (!category) throw new NotFoundException('Category not found')
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
     return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    this.categories = this.categories.map(category => {
-      if (category.category_id === id){
-        return{
-          ...category,
-          ...updateCategoryDto
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    return await this.categoryRepository.update(id, updateCategoryDto)
+      .then((result) => {
+        if (result.affected === 0) {
+          throw new NotFoundException('Category not found');
         }
-      }
-      return category;
-    })
-    return this.findOne(id)
+      }).catch ((error) => {
+        console.error('Error updating category:', error);
+        throw new Error(`Error updating category: ${error.message}`);
+      })
+      .finally(() => {
+        return this.findOne(id);
+      });
   }
 
   remove(id: number) {
-    const removeCategory = this.findOne(id)
+    return this.categoryRepository.delete(id)
+      .then((result) => {
+        if (result.affected === 0) {
+          throw new NotFoundException('Category not found');
+        }
+      }).catch((error) => {
+        console.error('Error deleting category:', error);
+        throw new Error(`Error deleting category: ${error.message}`);
+      });
+  }
 
-    this.categories = this.categories.filter(category => category.category_id !== id)
-
-    return removeCategory;
+  async getCategoriesWithUsage() {
+    return this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoin('category.expenses', 'expense')
+      .select([
+        'category.category_id AS category_id',
+        'category.category_name AS category_name',
+        'COUNT(expense.expense_id) AS usage_count'
+      ])
+      .groupBy('category.category_id')
+      .addGroupBy('category.category_name')
+      .orderBy('usage_count', 'DESC')
+      .getRawMany();
   }
 }
