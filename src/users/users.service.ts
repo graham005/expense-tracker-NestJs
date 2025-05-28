@@ -1,56 +1,70 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, Role } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { error } from 'console';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = []
-  findAll(role?: 'USER'| 'ADMIN') {
+    constructor(
+        @InjectRepository(User) private userRepository: Repository<User>
+    ){}
+    async findAll(role?: Role) {
         if(role) {
-           const rolesArray =  this.users.filter(user => user.role === role)
+           const rolesArray =  await this.userRepository.find({ where: { role } });
            if(rolesArray.length === 0) throw new NotFoundException ('User Role Not Found')
             return rolesArray
         }
-        return this.users
+        return this.userRepository.find();
     }
 
-    findOne(id: number) {
-        const user = this.users.find(user => user.user_id === id)
+    async findOne(id: number) {
+        const user = await this.userRepository.findOne({where: { user_id: id}})
 
         if(!user) throw new NotFoundException('User not found')
 
         return user
     }
 
-    create(createUserDto: CreateUserDto) {
-        const usersByHighestId = [...this.users].sort((a, b) => b.user_id - a.user_id)
-        const newUser = {
-            user_id: usersByHighestId.length > 0 ? usersByHighestId[0].user_id + 1 : 1,
-            created_at: new Date(),
-            updated_at: new Date(),
-            ...createUserDto,
+    async create(createUserDto: CreateUserDto): Promise<User> {
+        const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+        if (existingUser) {
+            throw new Error('User with this email already exists');
         }
-        this.users.push(newUser)
+        const newUser = await this.userRepository.create({...createUserDto})
+        await this.userRepository.save(newUser)
+      
         return newUser
     }
 
-    update ( id: number, updateUserDto: UpdateUserDto) {
-        this.users = this.users.map(user =>  {
-            if (user.user_id === id) {
-                return {...user, ...updateUserDto}
+    async updateProfile ( id: number, updateUserDto: UpdateUserDto) {
+        return await this.userRepository.update(id, updateUserDto).
+        then((result) => {
+            if (result.affected === 0) {
+                return new NotFoundException('User not found');
             }
-            return user
         })
-
-        return this.findOne(id)
+        .catch((error) => {
+            console.error('Error updating user:', error);
+            throw new Error(`Error updating user: ${error.message}`);
+        }).finally (() => {
+            return this.findOne(id);
+        });
     }
 
     delete(id: number) {
-        const removeUser = this.findOne(id)
-        
-        this.users = this.users.filter(user => user.user_id !== id)
-
-        return removeUser
+        return this.userRepository.delete(id)
+            .then((result) => {
+                if (result.affected === 0) {
+                    throw new NotFoundException('User not found');
+                }
+                return { message: 'User deleted successfully' };
+            })
+            .catch((error) => {
+                console.error('Error deleting user:', error);
+                throw new Error(`Error deleting user: ${error.message}`);
+            });
     }
 }
