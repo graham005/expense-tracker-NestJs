@@ -1,5 +1,12 @@
+import { IsDateString, IsInt } from "class-validator";
+
 export class CreateReportDto {
+    @IsInt()
     user_id: number;
-    start_date: Date;
-    end_date: Date;
+
+    @IsDateString()
+    start_date: string;
+
+    @IsDateString()
+    end_date: string;
 }

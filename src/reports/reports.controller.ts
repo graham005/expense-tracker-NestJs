@@ -22,13 +22,23 @@ export class ReportsController {
     return this.reportsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateReportDto: UpdateReportDto) {
-    return this.reportsService.update(id, updateReportDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id', ParseIntPipe) id: number, @Body() updateReportDto: UpdateReportDto) {
+  //   return this.reportsService.update(id, updateReportDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.reportsService.remove(id);
+  }
+
+  @Get('daily/:date')
+  getDailyReport(@Param('date') date: string) {
+    return this.reportsService.getDailyReport(date);
+  }
+
+  @Get('category/:categoryId')
+  getCategoryReport(@Param('categoryId', ParseIntPipe) categoryId: number) {
+    return this.reportsService.getCategoryReport(categoryId);
   }
 }
