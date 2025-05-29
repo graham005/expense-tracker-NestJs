@@ -9,7 +9,7 @@ import { error } from 'console';
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectRepository(User) private userRepository: Repository<User>
+        @InjectRepository(User) private readonly userRepository: Repository<User>
     ){}
     async findAll(role?: Role) {
         if(role) {

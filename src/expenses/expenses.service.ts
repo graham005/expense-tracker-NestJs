@@ -11,11 +11,11 @@ import { Category } from 'src/categories/entities/category.entity';
 export class ExpensesService {
   constructor(
     @InjectRepository(Expense)
-    private expenseRepository: Repository<Expense>,
+    private readonly expenseRepository: Repository<Expense>,
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto) {

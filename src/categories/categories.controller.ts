@@ -17,6 +17,11 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
+  @Get('usage')
+  getCategoriesWithUsage() {
+    return this.categoriesService.getCategoriesWithUsage();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findOne(id);
@@ -32,8 +37,4 @@ export class CategoriesController {
     return this.categoriesService.remove(id);
   }
 
-  @Get('usage')
-getCategoriesWithUsage() {
-  return this.categoriesService.getCategoriesWithUsage();
-}
 }
