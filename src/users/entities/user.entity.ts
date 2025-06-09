@@ -23,6 +23,9 @@ export class User {
     })
     role: Role;
 
+    @Column({ type: 'text', nullable: true, default: null })
+    hashedRefreshToken: string | null;
+
     @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
     created_at: Date;
 
