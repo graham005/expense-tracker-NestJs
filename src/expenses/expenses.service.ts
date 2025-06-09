@@ -30,7 +30,11 @@ export class ExpensesService {
       amount: createExpenseDto.amount,
       date: createExpenseDto.date,  
       description: createExpenseDto.description,
-      user: user,
+      user: {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      },
       category: category,
     });
     return this.expenseRepository.save(newExpense)

@@ -17,6 +17,19 @@ export class ReportsController {
     return this.reportsService.findAll();
   }
 
+  @Get('monthly/:year/:month')
+  getMonthlyReport(
+    @Param('year', ParseIntPipe) year: number,
+    @Param('month', ParseIntPipe) month: number,
+  ) {
+    return this.reportsService.getMonthlyReport(year, month);
+  }
+
+  @Get('yearly/:year')
+  getYearlyReport(@Param('year', ParseIntPipe) year: number) {
+    return this.reportsService.getYearlyReport(year);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.reportsService.findOne(id);

@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 export class CategoriesService {
   @InjectRepository(Category)
   private readonly categoryRepository: Repository<Category>
+  
   async create(createCategoryDto: CreateCategoryDto) {
     const existingCategory = await this.categoryRepository.findOne({ where: { category_name: createCategoryDto.category_name } });
     if (existingCategory) {

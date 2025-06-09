@@ -4,6 +4,7 @@ import { User } from 'src/users/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { Role } from 'src/users/dto/create-user.dto';
+import * as Bcrypt from 'bcrypt'
 
 @Injectable()
 export class SeedService {
@@ -20,7 +21,7 @@ export class SeedService {
             await queryRunner.startTransaction();
 
             try {
-                await queryRunner.query('DELETE FROM users')
+                await queryRunner.query('DELETE FROM "user"')
                 await queryRunner.commitTransaction();
                 this.logger.log('Users table cleared successfully.');
             } catch (error) {
@@ -35,11 +36,11 @@ export class SeedService {
             this.logger.log('Seeding users...');
             const users: User[] = []
 
-            for (let i = 1; 1 < 20; i++) {
+            for (let i = 1; i < 20; i++) {
                 const user = new User();
                 user.username = faker.person.fullName();
-                user.email = faker.internet.email();
-                user.password = faker.internet.password();
+                user.email = `user${i}_${faker.internet.email()}`;
+                user.password = await this.hashData(faker.internet.password());
                 user.role = Role.USER;
 
                 users.push(await this.userRepository.save(user));
@@ -52,4 +53,8 @@ export class SeedService {
             throw error;
         }
     }
+    private async hashData(data: string): Promise<string> {
+            const salt = await Bcrypt.genSalt(10);
+            return await Bcrypt.hash(data, salt);
+        }
 }

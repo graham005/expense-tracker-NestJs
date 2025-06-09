@@ -23,7 +23,11 @@ export class ReportsService {
   }
 
   async findAll(): Promise<Report[]> {
-    return this.reportRepository.find();
+    const newReport = await this.reportRepository.find();
+    if (newReport.length === 0) {
+      throw new NotFoundException('No report found');
+    }
+    return newReport
   }
 
   async findOne(id: number): Promise<Report> {
@@ -49,6 +53,40 @@ export class ReportsService {
       where: { date },
       relations: ['user', 'category'],
     });
+  }
+
+  async getMonthlyReport(year: number, month: number) {
+    return this.expenseRepository
+      .createQueryBuilder('expense')
+      .leftJoinAndSelect('expense.user', 'user')
+      .leftJoinAndSelect('expense.category', 'category')
+      .select([
+        'expense',
+        'user.user_id',
+        'user.firstName',
+        'user.lastName',
+        'user.email',
+        'category'
+      ])
+      .where('EXTRACT(YEAR FROM expense.date) = :year', { year })
+      .andWhere('EXTRACT(MONTH FROM expense.date) = :month', { month })
+      .getMany();
+  }
+
+  async getYearlyReport(year: number) {
+    return this.expenseRepository
+      .createQueryBuilder('expense')
+      .leftJoinAndSelect('expense.user', 'user')
+      .leftJoinAndSelect('expense.category', 'category')
+      .select([
+        'expense',
+        'user.user_id',
+        'user.username',
+        'user.email',
+        'category'
+      ])
+      .where('EXTRACT(YEAR FROM expense.date) = :year', { year })
+      .getMany();
   }
 
   async getCategoryReport(categoryId: number) {

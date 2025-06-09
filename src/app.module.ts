@@ -9,10 +9,13 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeedModule } from './seed/seed.module';
 import { LoggerMiddleware } from './logger.middleware';
-import { LogsModule } from './loggers/logs.module';
+import { LoggerModule } from './loggers/logs.module';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AtGuard } from './auth/guards/at.guard';
 
 @Module({
   imports: [
@@ -20,30 +23,36 @@ import { CacheableMemory } from 'cacheable';
       isGlobal: true,
       envFilePath: '.env'
     }),
-    UsersModule, CategoriesModule, ExpensesModule, ReportsModule, DatabaseModule, SeedModule, LogsModule,
-  CacheModule.registerAsync({
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    isGlobal: true,
-    useFactory: (configService: ConfigService) => {
-      return {
-        ttl: 60000,
-        stores: [
-          new Keyv({
-            store: new CacheableMemory({ ttl: 30000, lruSize: 5000}),
-          }),
-          createKeyv(configService.getOrThrow<string>('REDIS_URL')),
-        ],
-      };
-    },
-  }),
-  CacheableMemory
-],
+    UsersModule, CategoriesModule, ExpensesModule, ReportsModule, DatabaseModule, SeedModule, LoggerModule, AuthModule,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      isGlobal: true,
+      useFactory: (configService: ConfigService) => {
+        return {
+          ttl: 60000,
+          stores: [
+            new Keyv({
+              store: new CacheableMemory({ ttl: 30000, lruSize: 5000}),
+            }),
+            createKeyv(configService.getOrThrow<string>('REDIS_URL')),
+          ],
+        };
+      },
+    }),
+    AuthModule
+  ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: 'APP_INTERCEPTOR',
-    useClass: CacheInterceptor
-  }],
+  providers: [AppService, 
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard
+    }
+  ],
 })
 export class AppModule implements NestModule{
   configure(consumer: MiddlewareConsumer) {

@@ -1,5 +1,5 @@
 import { BaseExceptionFilter } from "@nestjs/core";
-import { LogsService } from "./loggers/logs.service";
+import { LoggerService } from "./loggers/logs.service";
 import { ArgumentsHost, Catch, HttpException, HttpStatus } from "@nestjs/common";
 import { Request, Response} from "express";
 
@@ -12,7 +12,7 @@ interface MyResponseObj {
 
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
-  private readonly logs = new LogsService();
+  private readonly logs = new LoggerService();
 
   private getClientIp(request: Request): string {
     // Get IP from X-Forwarded-For header or fall back to connection remote address
