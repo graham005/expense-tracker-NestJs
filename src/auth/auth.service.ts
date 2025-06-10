@@ -18,7 +18,7 @@ export class AuthService {
     //Check if the user exists in the database
     const foundUser = await this.userRepository.findOne({
       where: { email: createAuthDto.email },
-      select: ['user_id', 'email', 'password'],
+      select: ['user_id', 'email', 'password', 'role'],
     });
     if (!foundUser) {
       throw new NotFoundException('User with email ${createAuthDto.email} not found');
@@ -36,7 +36,8 @@ export class AuthService {
     // Generate Tokens
     const { accessToken, refreshToken } = await this.getTokens(
       foundUser.user_id,
-      foundUser.email 
+      foundUser.email,
+      foundUser.role
     );
 
     // Save the refresh token in the database
@@ -82,7 +83,8 @@ export class AuthService {
     // Generate new access and refresh tokens
     const { accessToken, refreshToken: newRefreshToken } = await this.getTokens(
       foundUser.user_id,
-      foundUser.email
+      foundUser.email,
+      foundUser.role
     );
 
     // Save the new refresh token in the database
@@ -98,12 +100,13 @@ export class AuthService {
   }
 
   // Helper method to generate access and refresh tokens 
-  private async getTokens(userId: number, email: string){
+  private async getTokens(userId: number, email: string, role: string){
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(
         {
           sub: userId,
-          email
+          email,
+          role
         },
         {
           secret: this.configService.getOrThrow<string>('JWT_ACCESS_TOKEN_SECRET'),
@@ -113,7 +116,8 @@ export class AuthService {
       this.jwtService.signAsync(
         {
           sub: userId, 
-          email
+          email,
+          role
         },
         {
           secret: this.configService.getOrThrow<string>('JWT_REFRESH_TOKEN_SECRET'),

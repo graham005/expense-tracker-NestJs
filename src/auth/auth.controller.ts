@@ -28,14 +28,14 @@ export class AuthController {
   }
 
   @Public()
-@Get('refresh')
-refreshTokens(
-  @Query('id', ParseIntPipe) id: number,
-  @Query('refreshToken') refreshToken: string
-) {
-  if (!refreshToken) {
-    throw new UnauthorizedException('Refresh token missing');
+  @Get('refresh')
+  refreshTokens(
+    @Query('id', ParseIntPipe) id: number,
+    @Query('refreshToken') refreshToken: string
+  ) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token missing');
+    }
+    return this.authService.refreshTokens(id, refreshToken);
   }
-  return this.authService.refreshTokens(id, refreshToken);
-}
 }
