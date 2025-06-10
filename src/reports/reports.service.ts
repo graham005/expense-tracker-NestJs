@@ -51,6 +51,9 @@ export class ReportsService {
   async getDailyReport(date: string) {
     return this.expenseRepository.find({
       where: { date },
+      select: {
+        
+      },
       relations: ['user', 'category'],
     });
   }
@@ -63,8 +66,7 @@ export class ReportsService {
       .select([
         'expense',
         'user.user_id',
-        'user.firstName',
-        'user.lastName',
+        'user.username',
         'user.email',
         'category'
       ])

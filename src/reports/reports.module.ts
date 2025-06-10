@@ -6,11 +6,13 @@ import { Report } from './entities/report.entity';
 import { DatabaseModule } from 'src/database/database.module';
 import { Expense } from 'src/expenses/entities/expense.entity';
 import { User } from 'src/users/entities/user.entity';
+import { CaslModule } from 'src/casl/casl.module';
 
 @Module({
   imports: [
     DatabaseModule,
-    TypeOrmModule.forFeature([ Report, Expense, User])
+    TypeOrmModule.forFeature([ Report, Expense, User]),
+    CaslModule
   ],
   controllers: [ReportsController],
   providers: [ReportsService],
