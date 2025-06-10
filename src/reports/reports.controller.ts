@@ -1,21 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('reports')
+@UseGuards(RolesGuard)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
-
-  @Post()
-  create(@Body() createReportDto: CreateReportDto) {
-    return this.reportsService.create(createReportDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.reportsService.findAll();
-  }
 
   @Get('monthly/:year/:month')
   getMonthlyReport(
@@ -28,21 +20,6 @@ export class ReportsController {
   @Get('yearly/:year')
   getYearlyReport(@Param('year', ParseIntPipe) year: number) {
     return this.reportsService.getYearlyReport(year);
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.reportsService.findOne(id);
-  }
-
-  // @Patch(':id')
-  // update(@Param('id', ParseIntPipe) id: number, @Body() updateReportDto: UpdateReportDto) {
-  //   return this.reportsService.update(id, updateReportDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.reportsService.remove(id);
   }
 
   @Get('daily/:date')
