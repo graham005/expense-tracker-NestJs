@@ -16,6 +16,8 @@ import { CacheableMemory } from 'cacheable';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AtGuard } from './auth/guards/at.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -40,17 +42,31 @@ import { AtGuard } from './auth/guards/at.guard';
         };
       },
     }),
-    AuthModule
+    AuthModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [{
+        ttl: config.getOrThrow<number>('THROTTLE_TTL'),
+        limit: config.getOrThrow<number>('THROTTLE_LIMIT'),
+        ignoreUserAgents: [/^curl\//, /^PostmanRuntime\//]
+      }]
+    }),
+    CaslModule
   ],
   controllers: [AppController],
   providers: [AppService, 
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor
+    // },
     {
       provide: APP_GUARD,
       useClass: AtGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
     }
   ],
 })

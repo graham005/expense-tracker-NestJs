@@ -3,9 +3,9 @@ import { IsDateString, IsInt, IsNumber, IsOptional, IsString, Matches } from "cl
 
 
 export class CreateExpenseDto {
-    @ApiProperty()
-    @IsInt()
-    user_id: number;
+    // @ApiProperty()
+    // @IsInt()
+    // user_id: number;
 
     @ApiProperty()
     @IsNumber()

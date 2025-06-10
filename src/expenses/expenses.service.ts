@@ -18,11 +18,11 @@ export class ExpensesService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async create(createExpenseDto: CreateExpenseDto) {
-    const user = await this.userRepository.findOne({ where: { user_id: createExpenseDto.user_id}});
+  async create(createExpenseDto: CreateExpenseDto, user: any) {
+    const foundUser = await this.userRepository.findOne({ where: { user_id: user.user_id}});
     const category = await this.categoryRepository.findOne({ where: { category_id: createExpenseDto.category_id }});
 
-    if (!user || !category) {
+    if (!foundUser || !category) {
       throw new NotFoundException('User or Category not found');
     }
 
@@ -30,18 +30,15 @@ export class ExpensesService {
       amount: createExpenseDto.amount,
       date: createExpenseDto.date,  
       description: createExpenseDto.description,
-      user: {
-      user_id: user.user_id,
-      username: user.username,
-      email: user.email,
-      },
+      user: foundUser,
       category: category,
     });
     return this.expenseRepository.save(newExpense)
   }
 
-  async findAll(): Promise<Expense[] | string>  {
+  async findAll(user: any): Promise<Expense[] | string>  {
     const expenses = await this.expenseRepository.find({
+      where: { user: { user_id: user.user_id } },
       relations: ['user', 'category'],
     });
 
@@ -52,9 +49,9 @@ export class ExpensesService {
     return expenses;
   }
 
-  async findOne(id: number): Promise<Expense | null> {
+  async findOne(id: number, user): Promise<Expense | null> {
     const expense = this.expenseRepository.findOne({
-      where: { expense_id: id },
+      where: { expense_id: id, user: {user_id: user.user_id} },
       relations: ['user', 'category'],
     });
 
@@ -64,7 +61,7 @@ export class ExpensesService {
     return expense;
   }
 
-  async update(id: number, updateExpenseDto: UpdateExpenseDto) {
+  async update(id: number, updateExpenseDto: UpdateExpenseDto, user) {
     const updateExpense: any = {...updateExpenseDto};
   
     if (updateExpenseDto.category_id) {
@@ -73,21 +70,16 @@ export class ExpensesService {
     }
 
     await this.expenseRepository.update(id, updateExpense);
-    return this.findOne(id);
+    return this.findOne(id, user);
   }
 
-  remove(id: number) {
-    const removeExpense = this.expenseRepository.delete(id)
-      .then((result) => {
-        if (result.affected === 0) {
-          throw new NotFoundException('Expense not found');
-        }
-        return { message: 'Expense deleted successfully' };
-      }).catch((error) => {
-        console.error('Error deleting expense:', error);
-        throw new Error(`Error deleting expense: ${error.message}`);
-      });
-    
-    return removeExpense;
+  async remove(id: number, user: any) {
+    const result = await this.expenseRepository.delete({ expense_id: id, user: { user_id: user.user_id } });
+  
+    if (result.affected === 0) {
+      throw new NotFoundException('Expense not found');
+    }
+  
+    return { message: 'Expense deleted successfully' };
   }
 }

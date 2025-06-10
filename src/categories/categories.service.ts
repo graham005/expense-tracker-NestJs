@@ -66,7 +66,7 @@ export class CategoriesService {
       });
   }
 
-  async getCategoriesWithUsage() {
+  getCategoriesWithUsage() {
     return this.categoryRepository
       .createQueryBuilder('category')
       .leftJoin('category.expenses', 'expense')
