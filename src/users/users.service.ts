@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as Bcrypt from 'bcrypt';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -76,6 +77,13 @@ export class UsersService {
         return await this.findOne(id);
     }
 
+    async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<Partial<User> | {message: string}>{
+        changePasswordDto.password = await this.hashData(changePasswordDto.password)
+        await this.userRepository.update(id, changePasswordDto);
+
+        return { message: 'Password changed successfully'}
+    }
+
     delete(id: number): Promise<string | { message: string }> {
         return this.userRepository.delete(id)
             .then((result) => {
@@ -89,4 +97,5 @@ export class UsersService {
                 throw new Error(`Error deleting user: ${error.message}`);
             });
     }
+
 }
