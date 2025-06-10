@@ -3,6 +3,9 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Request } from 'express';
 import { Public } from './decorators/public.decorator';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { User as UserDecorator} from 'src/auth/decorators/user.decorator'
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 export interface RequestWithUser extends Request {
   user: {
@@ -38,4 +41,18 @@ export class AuthController {
     }
     return this.authService.refreshTokens(id, refreshToken);
   }
+
+  @Patch('change-password')
+  changePassword(@Body() changePasswordDto: ChangePasswordDto, @UserDecorator() user: any) {
+    return this.authService.changePassword(
+      user.user_id,
+      changePasswordDto.oldPassword,
+      changePasswordDto.newPassword,
+    )
+  }
+
+  @Post('forgot-password')
+    forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto){
+      return this.authService.forgotPassword(forgotPasswordDto.email)
+    }
 }

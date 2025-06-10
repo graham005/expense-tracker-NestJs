@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import * as Bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { nanoid } from 'nanoid';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +44,7 @@ export class AuthService {
     // Save the refresh token in the database
     await this.saveRefreshToken(foundUser.user_id, refreshToken);
 
-    return { accessToken, refreshToken}
+    return {user_id: foundUser.user_id, accessToken, refreshToken}
   }
 
   async signOut(userId: number) {
@@ -91,6 +92,39 @@ export class AuthService {
     await this.saveRefreshToken(foundUser.user_id, newRefreshToken);
 
     return { accessToken, refreshToken: newRefreshToken };
+  }
+
+  async changePassword(userId: number, oldPassword: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found...');
+    }
+
+    const isOldPasswordValid = await Bcrypt.compare(
+      oldPassword,
+      user.password,
+    );
+
+    if (!isOldPasswordValid) {
+      throw new NotFoundException('Invalid old password');
+    }
+
+    const newHashedPassword = await this.hashData(newPassword);
+
+    await this.userRepository.update(userId, { password: newHashedPassword });
+
+    return { message: 'Password changed successfully' };
+  }
+
+  async forgotPassword(email:string) {
+    const user = await this.userRepository.findOne({
+      where: {email}
+    })
+    if (user) {
+      
+    }
+    
+    return { message: 'An Email has been sent successfully to this User'}
   }
 
   //Helper method to hash the password
