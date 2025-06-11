@@ -15,47 +15,27 @@ export class ReportsService {
     private readonly expenseRepository: Repository<Expense>,
   ) {}
 
-  async create(createReportDto: CreateReportDto): Promise<Report> {
-    const newReport = this.reportRepository.create({
-      ...createReportDto,
-    });
-    return this.reportRepository.save(newReport);
-  }
-
-  async findAll(): Promise<Report[]> {
-    const newReport = await this.reportRepository.find();
-    if (newReport.length === 0) {
-      throw new NotFoundException('No report found');
-    }
-    return newReport
-  }
-
-  async findOne(id: number): Promise<Report> {
-    const report = await this.reportRepository.findOne({ where: { report_id: id } });
-    if (!report) throw new NotFoundException('Report not found');
-    return report;
-  }
-
-  // async update(id: number, updateReportDto: UpdateReportDto): Promise<Report> {
-  //   const report = await this.findOne(id);
-  //   Object.assign(report, updateReportDto);
-  //   return this.reportRepository.save(report);
-  // }
-
-  async remove(id: number): Promise<Report> {
-    const report = await this.findOne(id);
-    await this.reportRepository.delete(id);
-    return report;
-  }
-
   async getDailyReport(date: string) {
     return this.expenseRepository.find({
       where: { date },
-      select: {
-        
-      },
+      select: {},
       relations: ['user', 'category'],
     });
+  }
+
+  async getDailySummary(date: string) {
+    const result = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'totalAmount')
+      .addSelect('COUNT(expense.expense_id)', 'totalCount')
+      .where('expense.date = :date', { date })
+      .getRawOne();
+
+    return {
+      date,
+      totalAmount: Number(result.totalAmount) || 0,
+      totalCount: Number(result.totalCount) || 0,
+    };
   }
 
   async getMonthlyReport(year: number, month: number) {
@@ -75,6 +55,25 @@ export class ReportsService {
       .getMany();
   }
 
+  async getMonthlySummary(year: number, month: number) {
+    const result = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'totalAmount')
+      .addSelect('COUNT(expense.expense_id)', 'totalCount')
+      .addSelect('AVG(expense.amount)', 'averageAmount')
+      .where('EXTRACT(YEAR FROM expense.date) = :year', { year })
+      .andWhere('EXTRACT(MONTH FROM expense.date) = :month', { month })
+      .getRawOne();
+
+    return {
+      year,
+      month,
+      totalAmount: Number(result.totalAmount) || 0,
+      totalCount: Number(result.totalCount) || 0,
+      averageAmount: Number(result.averageAmount) || 0,
+    };
+  }
+
   async getYearlyReport(year: number) {
     return this.expenseRepository
       .createQueryBuilder('expense')
@@ -89,6 +88,23 @@ export class ReportsService {
       ])
       .where('EXTRACT(YEAR FROM expense.date) = :year', { year })
       .getMany();
+  }
+
+  async getYearlySummary(year: number) {
+    const result = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'totalAmount')
+      .addSelect('COUNT(expense.expense_id)', 'totalCount')
+      .addSelect('AVG(expense.amount)', 'averageAmount')
+      .where('EXTRACT(YEAR FROM expense.date) = :year', { year })
+      .getRawOne();
+
+    return {
+      year,
+      totalAmount: Number(result.totalAmount) || 0,
+      totalCount: Number(result.totalCount) || 0,
+      averageAmount: Number(result.averageAmount) || 0,
+    };
   }
 
   async getCategoryReport(categoryId: number) {

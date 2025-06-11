@@ -24,6 +24,16 @@ export class ReportsController {
 
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Read, 'Report'))
+  @Get('monthly-summary/:year/:month')
+  getMonthlySummary(
+    @Param('year', ParseIntPipe) year: number,
+    @Param('month', ParseIntPipe) month: number,
+  ) {
+    return this.reportsService.getMonthlySummary(year, month);
+  }
+
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, 'Report'))
   @Get('yearly/:year')
   getYearlyReport(@Param('year', ParseIntPipe) year: number) {
     return this.reportsService.getYearlyReport(year);
@@ -31,9 +41,23 @@ export class ReportsController {
 
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Read, 'Report'))
+  @Get('yearly-summary/:year')
+  getYearlySummary(@Param('year', ParseIntPipe) year: number) {
+    return this.reportsService.getYearlySummary(year);
+  }
+
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, 'Report'))
   @Get('daily/:date')
   getDailyReport(@Param('date') date: string) {
     return this.reportsService.getDailyReport(date);
+  }
+
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, 'Report'))
+  @Get('daily-summary/:date')
+  getDailySummary(@Param('date') date: string) {
+    return this.reportsService.getDailySummary(date);
   }
 
   @UseGuards(PoliciesGuard)
