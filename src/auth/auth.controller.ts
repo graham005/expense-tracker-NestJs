@@ -6,6 +6,7 @@ import { Public } from './decorators/public.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { User as UserDecorator} from 'src/auth/decorators/user.decorator'
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { UpdateProfileDto } from './dto/update-profile';
 
 export interface RequestWithUser extends Request {
   user: {
@@ -55,4 +56,14 @@ export class AuthController {
     forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto){
       return this.authService.forgotPassword(forgotPasswordDto.email)
     }
+
+  @Get('me')
+  getProfile(@UserDecorator() user: any){
+    return this.authService.getProfile(user)
+  }
+
+  @Patch('me')
+  editProfile(@Body() updateProfileDto: UpdateProfileDto, @UserDecorator() user: any) {
+    return this.authService.editProfile(user, updateProfileDto)
+  }
 }

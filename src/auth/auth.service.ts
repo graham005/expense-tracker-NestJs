@@ -6,12 +6,13 @@ import { Repository } from 'typeorm';
 import * as Bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { nanoid } from 'nanoid';
+import { UpdateProfileDto } from './dto/update-profile';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {}
@@ -94,7 +95,7 @@ export class AuthService {
     return { accessToken, refreshToken: newRefreshToken };
   }
 
-  async changePassword(userId: number, oldPassword: string, newPassword: string) {
+  async changePassword(userId: number, oldPassword: string, newPassword: string): Promise<{message: string}> {
     const user = await this.userRepository.findOne({ where: { user_id: userId } });
     if (!user) {
       throw new NotFoundException('User not found...');
@@ -125,6 +126,29 @@ export class AuthService {
     }
     
     return { message: 'An Email has been sent successfully to this User'}
+  }
+
+  async getProfile(user: any): Promise<User>{
+    const getUser = await this.userRepository.findOne({
+      where: {user_id: user.user_id}
+    })
+    if(!getUser){
+      throw new NotFoundException('User not found. Kindly login')
+    }
+
+    return getUser
+  }
+
+  async editProfile(user: any, updateProfileDto: UpdateProfileDto): Promise<{message: string}> {
+    const foundUser = await this.userRepository.findOne({
+      where: {user_id: user.user_id}
+    })
+    if(!foundUser){
+      throw new NotFoundException('You are not found. Kindly Login')
+    }
+    const updatedUser = this.userRepository.update(user.user_id, updateProfileDto)
+
+    return {message: 'Profile Updated Successfully'}
   }
 
   //Helper method to hash the password
