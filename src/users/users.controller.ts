@@ -37,19 +37,13 @@ export class UsersController {
     return this.usersService.findOne(user_id);
   }
 
-  // @Roles(Role.ADMIN, Role.USER)
-  // @Patch(':id')
-  // changePassword(@Param('id', ParseIntPipe) id: number, @Body() changePasswordDto: ChangePasswordDto){
-  //   return this.usersService.changePassword(id, changePasswordDto)
-  // }
-
-  @Roles(Role.ADMIN, Role.USER)
-  @Patch('/profile/:id')
+  @Roles(Role.ADMIN)
+  @Patch(':id')
   update(@Param('id', ParseIntPipe) user_id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateProfile(user_id, updateUserDto);
   }
 
-  @Roles(Role.ADMIN, Role.USER)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) user_id: number) {
     return this.usersService.delete(user_id);

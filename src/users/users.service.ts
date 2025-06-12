@@ -77,13 +77,6 @@ export class UsersService {
         return await this.findOne(id);
     }
 
-    // async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<Partial<User> | {message: string}>{
-    //     changePasswordDto.password = await this.hashData(changePasswordDto.password)
-    //     await this.userRepository.update(id, changePasswordDto);
-
-    //     return { message: 'Password changed successfully'}
-    // }
-
     delete(id: number): Promise<string | { message: string }> {
         return this.userRepository.delete(id)
             .then((result) => {
