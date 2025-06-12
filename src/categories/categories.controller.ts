@@ -24,12 +24,6 @@ export class CategoriesController {
   }
 
   @Roles(Role.ADMIN)
-  @Get('usage')
-  getCategoriesWithUsage() {
-    return this.categoriesService.getCategoriesWithUsage();
-  }
-
-  @Roles(Role.ADMIN)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findOne(id);

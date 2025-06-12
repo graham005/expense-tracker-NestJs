@@ -21,7 +21,7 @@ export class CategoriesService {
 
     return newCategory;
   }
-  async findAll() {
+  async findAll(): Promise<Category[]> {
     const categories = await this.categoryRepository.find();
     if (categories.length === 0) {
       throw new NotFoundException('No categories found');
@@ -29,7 +29,7 @@ export class CategoriesService {
     return categories;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Category> {
     const category = await this.categoryRepository.findOne({ where: { category_id: id } });
 
     if (!category) {
@@ -39,7 +39,7 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<string | number| void> {
     return await this.categoryRepository.update(id, updateCategoryDto)
       .then((result) => {
         if (result.affected === 0) {
@@ -54,7 +54,7 @@ export class CategoriesService {
       });
   }
 
-  remove(id: number) {
+  remove(id: number): Promise<string| void> {
     return this.categoryRepository.delete(id)
       .then((result) => {
         if (result.affected === 0) {
@@ -66,18 +66,5 @@ export class CategoriesService {
       });
   }
 
-  getCategoriesWithUsage() {
-    return this.categoryRepository
-      .createQueryBuilder('category')
-      .leftJoin('category.expenses', 'expense')
-      .select([
-        'category.category_id AS category_id',
-        'category.category_name AS category_name',
-        'COUNT(expense.expense_id) AS usage_count'
-      ])
-      .groupBy('category.category_id')
-      .addGroupBy('category.category_name')
-      .orderBy('usage_count', 'DESC')
-      .getRawMany();
-  }
+  
 }
