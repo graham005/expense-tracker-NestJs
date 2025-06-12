@@ -4,9 +4,9 @@ services:
     container_name: expensetrackerdb
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secretpassword
-      POSTGRES_DB: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: yh3U6aUizVJTPCyr1ftnnbaZatQmCyM5
+      POSTGRES_DB: expense_tracker_db_nryn
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
       - "5432:5432"
@@ -49,9 +49,9 @@ services:
       - PORT=9000
       - DBHOST=expensetrackerdb
       - DBPORT=5432
-      - DBNAME=postgres
-      - DBUSER=postgres
-      - DBPASSWORD=secretpassword
+      - DBNAME=expense_tracker_db_nryn
+      - DBUSER=user
+      - DBPASSWORD=yh3U6aUizVJTPCyr1ftnnbaZatQmCyM5
       - DB_SYNC=true
       - DB_LOGGING=true
       - REDIS_URL=redis://:${REDIS_PASSWORD:-secretpassword}@redis:6379

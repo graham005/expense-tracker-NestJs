@@ -13,13 +13,13 @@ RUN mkdir -p /app/applogs
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Use a reliable npm registry mirror & increase retries
+# Use a npm registry mirror & increase retries
 RUN pnpm config set registry https://registry.npmmirror.com && \
     pnpm config set fetch-retries 5 && \
     pnpm config set fetch-retry-mintimeout 10000 && \
     pnpm config set fetch-retry-maxtimeout 60000
 
-# Install dependencies (with --frozen-lockfile)
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy all source code
