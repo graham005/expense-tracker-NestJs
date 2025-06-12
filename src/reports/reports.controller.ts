@@ -6,6 +6,8 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { PoliciesGuard } from 'src/casl/guards/policies.guard';
 import { Action } from 'src/casl/action.enum';
 import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/users/dto/create-user.dto';
 
 @Controller('reports')
 @UseGuards(RolesGuard)
@@ -65,5 +67,11 @@ export class ReportsController {
   @Get('category/:categoryId')
   getCategoryReport(@Param('categoryId', ParseIntPipe) categoryId: number) {
     return this.reportsService.getCategoryReport(categoryId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('usage')
+  getCategoriesWithUsage() {
+    return this.reportsService.getCategoriesWithUsage();
   }
 }

@@ -7,11 +7,12 @@ import { DatabaseModule } from 'src/database/database.module';
 import { Expense } from 'src/expenses/entities/expense.entity';
 import { User } from 'src/users/entities/user.entity';
 import { CaslModule } from 'src/casl/casl.module';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Module({
   imports: [
     DatabaseModule,
-    TypeOrmModule.forFeature([ Report, Expense, User]),
+    TypeOrmModule.forFeature([ Report, Expense, User, Category]),
     CaslModule
   ],
   controllers: [ReportsController],

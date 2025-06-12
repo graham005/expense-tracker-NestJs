@@ -5,6 +5,7 @@ import { Report } from './entities/report.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Expense } from 'src/expenses/entities/expense.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Injectable()
 export class ReportsService {
@@ -13,9 +14,11 @@ export class ReportsService {
     private readonly reportRepository: Repository<Report>,
     @InjectRepository(Expense)
     private readonly expenseRepository: Repository<Expense>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async getDailyReport(date: string) {
+  async getDailyReport(date: string): Promise<Expense[]> {
     return this.expenseRepository.find({
       where: { date },
       select: {},
@@ -38,7 +41,7 @@ export class ReportsService {
     };
   }
 
-  async getMonthlyReport(year: number, month: number) {
+  async getMonthlyReport(year: number, month: number): Promise<Expense[]> {
     return this.expenseRepository
       .createQueryBuilder('expense')
       .leftJoinAndSelect('expense.user', 'user')
@@ -74,7 +77,7 @@ export class ReportsService {
     };
   }
 
-  async getYearlyReport(year: number) {
+  async getYearlyReport(year: number): Promise<Expense[]> {
     return this.expenseRepository
       .createQueryBuilder('expense')
       .leftJoinAndSelect('expense.user', 'user')
@@ -107,10 +110,25 @@ export class ReportsService {
     };
   }
 
-  async getCategoryReport(categoryId: number) {
+  async getCategoryReport(categoryId: number): Promise<Expense[]> {
     return this.expenseRepository.find({
       where: { category: { category_id: categoryId}},
       relations: ['user', 'category'],
     })
+  }
+
+  getCategoriesWithUsage(): Promise<Category[]> {
+    return this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoin('category.expenses', 'expense')
+      .select([
+        'category.category_id AS category_id',
+        'category.category_name AS category_name',
+        'COUNT(expense.expense_id) AS usage_count'
+      ])
+      .groupBy('category.category_id')
+      .addGroupBy('category.category_name')
+      .orderBy('usage_count', 'DESC')
+      .getRawMany();
   }
 }
