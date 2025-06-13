@@ -52,9 +52,13 @@ services:
       - DBNAME=expense_tracker_db_nryn
       - DBUSER=user
       - DBPASSWORD=yh3U6aUizVJTPCyr1ftnnbaZatQmCyM5
+      # - DBNAME=postgres
+      # - DBUSER=postgres
+      # - DBPASSWORD=secretpassword
       - DB_SYNC=true
       - DB_LOGGING=true
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-secretpassword}@redis:6379
+      - REDIS_URL=redis://red-d15jc5p5pdvs73fciee0:6379
+      # - REDIS_URL=redis://:${REDIS_PASSWORD:-secretpassword}@redis:6379
       - JWT_ACCESS_TOKEN_SECRET=${JWT_ACCESS_TOKEN_SECRET:-secretkey}
       - JWT_ACCESS_TOKEN_EXPIRATION_TIME=${JWT_ACCESS_TOKEN_EXPIRATION_TIME:-15m}
       - JWT_REFRESH_TOKEN_SECRET=${JWT_REFRESH_TOKEN_SECRET:-secretkey}
