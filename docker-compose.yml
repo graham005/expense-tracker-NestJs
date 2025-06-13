@@ -57,7 +57,7 @@ services:
       # - DBPASSWORD=secretpassword
       - DB_SYNC=true
       - DB_LOGGING=true
-      - REDIS_URL=redis://red-d15jc5p5pdvs73fciee0:6379
+      - REDIS_URL=redis://red-d15jc5p5pdvs73fciee0:NXxqBllK3Qh4Dai2qW6BlLUnRGsqiBy7@red-d15jc5p5pdvs73fciee0:6379
       # - REDIS_URL=redis://:${REDIS_PASSWORD:-secretpassword}@redis:6379
       - JWT_ACCESS_TOKEN_SECRET=${JWT_ACCESS_TOKEN_SECRET:-secretkey}
       - JWT_ACCESS_TOKEN_EXPIRATION_TIME=${JWT_ACCESS_TOKEN_EXPIRATION_TIME:-15m}
